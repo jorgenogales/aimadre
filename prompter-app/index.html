@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#040408">
+  <meta name="description"
+    content="Somete tus ideas de prompt al veredicto irónico y divertido de la Madre Sarcástica de la IA en tiempo real.">
+
+  <title>AI Live Prompter — Google Cloud</title>
+
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+
+<body>
+
+  <!-- Lienzo de Partículas Flotantes Antigravedad -->
+  <canvas id="particles-canvas"></canvas>
+
+  <main id="app">
+    <div class="glass-card" id="main-card">
+
+      <!-- Título de Marca Global -->
+      <header>
+        <h1 id="brand-title">AI Live</h1>
+        <p class="tagline" id="brand-tagline">Google Cloud AI Live <strong>Prompter</strong></p>
+      </header>
+
+      <!-- VISTA 0: ACCESO / LOGIN SEGURO -->
+      <section id="view-login" class="view-state active">
+        <div class="form-group">
+          <label for="passcode-input" class="form-label" id="lbl-passcode">Código de Acceso del Evento</label>
+          <input type="password" id="passcode-input" class="neon-input" placeholder="Ingresa el código secreto..." autocomplete="off" required>
+          <div class="error-message" id="login-error-msg"></div>
+        </div>
+        <button type="button" id="btn-login" class="neon-button">
+          <span class="btn-text">Verificar Código</span>
+          <span class="spinner-container"></span>
+        </button>
+      </section>
+
+      <!-- VISTA 1: ONBOARDING / IDENTIFICACIÓN -->
+      <section id="view-onboarding" class="view-state">
+        <div class="form-group">
+          <label for="nickname-input" class="form-label" id="lbl-nickname">Ingresa tu apodo</label>
+          <input type="text" id="nickname-input" class="neon-input" placeholder="ej: DevDreamer" autocomplete="off"
+            maxlength="20" required>
+        </div>
+        <button type="button" id="btn-join" class="neon-button">
+          <span class="btn-text">Unirse al Reto</span>
+          <span class="spinner-container"></span>
+        </button>
+      </section>
+
+      <!-- VISTA 2: ENVÍO DE PROMPT -->
+      <section id="view-prompt" class="view-state">
+        <div class="flex-center">
+          <div class="hilo-badge" id="player-badge">
+            Apodo: <span id="player-nickname-prompt">...</span> | Código: <span id="player-code-prompt">AMP-XXXX</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prompt-input" class="form-label" id="lbl-prompt">¿Qué deseas crear hoy?</label>
+          <textarea id="prompt-input" class="neon-textarea"
+            placeholder="Escribe tu prompt aquí... (ej: Una ciudad flotante de silicio sostenida por globos aerostáticos de helio)"
+            maxlength="200" required></textarea>
+        </div>
+        <button type="button" id="btn-submit-prompt" class="neon-button btn-cyan">
+          <span class="btn-text">Enviar Prompt a la IA</span>
+          <span class="spinner-container"></span>
+        </button>
+
+        <!-- Código QR inline para fácil acceso y compartición -->
+        <div class="prompt-qr-section">
+          <p class="prompt-qr-text">¿Quieres participar desde otro dispositivo? Escanea aquí:</p>
+          <div class="prompt-qr-wrapper">
+            <img src="./assets/qr-prompter.png" alt="QR Link" class="prompt-qr-image">
+            <div class="qr-scan-line prompt-scan-line"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 3: EVALUACIÓN Y COMENTARIO SARCÁSTICO -->
+      <section id="view-result" class="view-state">
+        <div class="flex-center">
+          <div class="hilo-badge" id="result-badge">
+            Apodo: <span id="player-nickname-result">...</span> | Código: <span id="player-code-result">AMP-XXXX</span>
+          </div>
+        </div>
+
+        <div class="result-panel" id="verdict-panel">
+          <div class="result-header" id="verdict-status">Procesando veredicto...</div>
+          <p class="sarcasm-text" id="sarcasm-content"></p>
+        </div>
+
+        <button type="button" id="btn-retry" class="neon-button">Escribir Otro Prompt</button>
+      </section>
+
+    </div>
+
+    <!-- Tarjeta de Código QR de Acceso -->
+    <div class="glass-card qr-card" id="qr-card">
+      <div class="qr-container">
+        <h2 class="qr-title">Acceso Móvil</h2>
+        <p class="qr-description">Escanea con tu teléfono para participar y enviar tus prompts en tiempo real.</p>
+        <div class="qr-image-wrapper">
+          <img src="./assets/qr-prompter.png" alt="QR AI Live Prompter" class="qr-image">
+          <div class="qr-scan-line"></div>
+        </div>
+        <div class="qr-footer">
+          <span class="qr-badge">
+            <svg class="icon-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+              <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            </svg>
+            Optimizado para Móviles
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
