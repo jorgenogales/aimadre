@@ -9,6 +9,8 @@
 
 ### GALLERY (LANDING PAGE)
 * Puedes encontrar un wireframe del diseño en el proyecto "AI Qué Bonito" de Stitch
+* El diseño tiene que ser mobile friendly
+* Ante acciones que impliquen tiempo de espera tiene que mostrar un indicador de que se está procesando la petición
 * Será una aplicación llamada "AI Qué Bonito!" que se ejecute en Firebase Hosting
 * Esta aplicación llamará a una cloud function que devuelva todos los contenidos procesados de la colección "prompts" de Firestore y muestre en una página web las imágenes definida en Backend.
 * Para mostrar las imágenes se utilizará la URL pública de los contenidos del bucket
@@ -28,6 +30,7 @@
 * IMPORTANTE: El usuario puede cambiar su voto pulsando en uno de los votos que haya dado lo cual restará 1 de los votos de la imagen y sumará 1 a los votos restantes
 
 #### BACKEND
+* **Configuración de entorno:** Se debe crear un archivo `.npmrc` con el contenido `registry=https://registry.npmjs.org/` en todos los directorios de Cloud Functions que se hagan. Esto evita que al utilizar un portátil corporativo el `package-lock.json` apunte a registros privados y falle el despliegue.
 * El backend de la galería consistirá en varias cloud functions que:
 - Permitan leer las imágenes procesadas de una coleccion de Firestore llamada "prompts" con los documentos con el campo status=completed. Este es el esquema:
 comment: "Una imagen que capta la esencia del trabajo duro y la diplomacia corporativa. Seguro que los modelos de IA se sentirán muy identificados con esta profunda expresión artística."

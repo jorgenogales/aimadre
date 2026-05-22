@@ -6,6 +6,7 @@
 * El alcance de esta aplicación va a consistir en recoger datos (prompts) que los asistentes habrán dejado por medio de otra aplicación en una colleción de Firestore y llamar a Gemini para convertir esos prompts en imágenes y mostrar el resultado en una galería para que la gente pueda votar los contenidos generados para que se pueda dar un premio a la persona con el prompt que haya generado la imagen más votada
 
 ### PROCESADO DE IMÁGENES (Cloud Functions, Gemini API, Firestore, Cloud Storage)
+* **Configuración de entorno:** Se debe crear un archivo `.npmrc` con el contenido `registry=https://registry.npmjs.org/` en todos los directorios de Cloud Functions que se hagan. Esto evita que al utilizar un portátil corporativo el `package-lock.json` apunte a registros privados y falle el despliegue.
 * Esta parte servidora tiene que registrar un trigger en Firestore que se dispare cuando se inserte un nuevo prompt en la colección prompts
 * El esquema de la colección prompts es el siguiente:
 comment: "Una imagen que capta la esencia del trabajo duro y la diplomacia corporativa. Seguro que los modelos de IA se sentirán muy identificados con esta profunda expresión artística."
@@ -31,4 +32,3 @@ votes: 1
 * Para generar la imagen, el modelo al que se llame será "gemini-3.1-flash" (Nanobanana 2) y se deberá llamar con las librerías de Google Gen AI SDK
 * En la medida de lo posible se deberán paralelizar hasta 5 peticiones (siendo esto configurable)
 * Una vez generada, almacenará la misma en un bucket público llamado "aiquebonito" y se actualizará el documento de Firestore con la ruta
-

@@ -12,6 +12,19 @@
       "predeploy": [
         "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
+    },
+    {
+      "source": "pb-functions",
+      "codebase": "pb",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firestore-debug.log"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
     }
   ],
   "firestore": {
@@ -29,6 +42,10 @@
       {
         "source": "/prompter/**",
         "destination": "/prompter/index.html"
+      },
+      {
+        "source": "/pb/**",
+        "destination": "/pb/index.html"
       }
     ]
   },

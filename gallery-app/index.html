@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>AI Qué Bonito! | Galería Cinemática</title>
+  
+  <!-- Tailwind CSS & Plugins (Fidelity to design system layout) -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Fonts: Geist (Regular/Bold via CDN) & JetBrains Mono for metadata -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <style>
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+      font-weight: 400;
+    }
+    @font-face {
+      font-family: 'Geist';
+      src: url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+      font-weight: 700;
+    }
+  </style>
+  
+  <!-- Custom Styles for Glassmorphism, OLED Dark, FLIP Transitions -->
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="bg-background text-on-surface select-none">
+
+  <!-- TopAppBar (Glassmorphic & Premium) -->
+  <header class="fixed top-0 z-50 w-full bg-surface-container-lowest/80 backdrop-blur-xl border-b border-white/5">
+    <div class="flex justify-between items-center w-full px-gutter py-3 sm:py-4 max-w-[1800px] mx-auto">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-xl sm:text-2xl animate-pulse">movie</span>
+        </div>
+        <div class="font-bold text-primary tracking-tighter text-lg sm:text-2xl hidden min-[400px]:block">AI Qué Bonito!</div>
+      </div>
+      
+      <div class="flex items-center gap-3 sm:gap-6">
+        <div id="session-badge" class="hidden flex items-center gap-1.5 sm:gap-2 bg-white/5 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/10 font-label-sm text-[10px] sm:text-[11px] text-on-surface-variant">
+          <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+          <span id="badge-username" class="hidden md:inline">Curador</span>
+          <span id="badge-votes-left" class="bg-primary/20 text-primary px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold">3 VOTOS</span>
+        </div>
+        
+        <a class="bg-primary text-on-primary px-4 sm:px-6 py-2 rounded-full text-xs font-bold hover:brightness-110 hover:shadow-[0_0_20px_rgba(208,188,255,0.3)] transition-all active:scale-95 flex items-center gap-1.5 sm:gap-2" href="/prompter/index.html">
+          <span class="material-symbols-outlined text-sm sm:text-xs">add_box</span>
+          <span class="hidden sm:inline">CREAR PROMPT</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="pt-24 sm:pt-28 px-gutter pb-16 max-w-[1800px] mx-auto min-h-screen">
+    
+    <!-- Giant 16:9 Featured Hero Section -->
+    <section class="mb-8 sm:mb-16">
+      <div class="relative w-full aspect-[1.1] min-min-[400px]:aspect-[4/3] sm:aspect-[16/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-surface-container-highest" id="hero-display">
+        
+        <!-- Active Slide (Fades dynamically) -->
+        <div class="absolute inset-0 w-full h-full" id="hero-slide-container">
+          <div class="absolute inset-0 bg-cover bg-center transition-transform duration-[6s]" id="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564');"></div>
+          <div class="absolute inset-0 glass-overlay opacity-85"></div>
+          
+          <div class="absolute bottom-0 left-0 w-full p-4 sm:p-8 md:p-12 flex flex-col sm:flex-row justify-between items-stretch sm:items-end gap-4 z-20">
+            <div class="w-full sm:max-w-[70%] lg:max-w-[75%]">
+              <span class="text-[10px] sm:text-xs font-bold text-primary mb-1.5 sm:mb-2 block uppercase tracking-widest font-label-sm flex items-center gap-1.5 sm:gap-2">
+                <span class="material-symbols-outlined text-sm">stars</span> EXPOSICIÓN DESTACADA
+              </span>
+              <h2 class="text-xl sm:text-3xl md:text-5xl font-bold text-white mb-1.5 sm:mb-2 leading-tight tracking-tight" id="hero-title">Iniciando Galería...</h2>
+              <p class="text-xs sm:text-sm md:text-lg text-on-surface-variant italic line-clamp-2 sm:line-clamp-3 mb-3 sm:mb-4 max-w-4xl" id="hero-prompt">Escribe un prompt en la aplicación del prompter para ver la magia de Gemini en vivo.</p>
+              
+              <div class="flex items-center gap-2 sm:gap-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-primary text-sm sm:text-lg">artist</span>
+                </div>
+                <div>
+                  <p class="font-label-sm text-[11px] sm:text-xs text-white" id="hero-author">Autor: Esperando prompt...</p>
+                  <p class="text-[9px] sm:text-[10px] text-on-surface-variant/60 uppercase tracking-wider" id="hero-time">AILIVE-XXXX</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-4 sm:gap-2 bg-black/40 backdrop-blur-md p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/10 w-full sm:w-auto" id="hero-vote-container">
+              <div class="flex flex-col sm:items-center">
+                <span class="text-[9px] sm:text-xs font-bold text-on-surface-variant font-label-sm">VOTOS RECIBIDOS</span>
+                <span class="text-lg sm:text-2xl font-bold text-white" id="hero-votes-count">0</span>
+              </div>
+              <button id="hero-vote-btn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 border border-primary/30 text-primary flex items-center justify-center upvote-btn-glow">
+                <span class="material-symbols-outlined text-base sm:text-lg">thumb_up</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Slide Progress Bar -->
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-30">
+          <div class="h-full bg-primary" id="hero-progress" style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Gallery Grid Title -->
+    <div class="flex justify-between items-center mb-6 sm:mb-8 border-b border-white/5 pb-4">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <h3 class="text-xl sm:text-3xl font-bold text-white tracking-tight">Obras de la Audiencia</h3>
+        <span id="gallery-count-badge" class="bg-white/5 border border-white/10 text-on-surface-variant px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-label-sm uppercase">0 IMÁGENES</span>
+      </div>
+    </div>
+
+    <!-- Bento Grid Container for dynamic card injection -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 relative" id="gallery-grid">
+      <!-- Cards and notices injected dynamically via JS -->
+    </div>
+    
+  </main>
+
+  <!-- Fullscreen Modal (Theater Mode) -->
+  <div class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl hidden flex flex-col justify-center p-4 sm:p-8 overflow-y-auto" id="fullscreen-overlay">
+    <!-- Modal Wrapper to center and control layout -->
+    <div class="w-full max-w-5xl mx-auto flex flex-col gap-4 sm:gap-6 my-auto relative">
+      
+      <!-- Close Button (Positioned at top right of the viewport, highly accessible) -->
+      <button class="absolute -top-12 right-0 sm:-right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 transition-colors z-50" id="close-fullscreen-btn">
+        <span class="material-symbols-outlined text-xl sm:text-2xl">close</span>
+      </button>
+      
+      <!-- Image Container -->
+      <div class="w-full aspect-[16/9] overflow-hidden rounded-2xl border border-white/10 shadow-2xl relative bg-surface-container-lowest">
+        <img alt="Visualización a pantalla completa" class="w-full h-full object-contain" id="fullscreen-img" src="">
+        <div class="absolute inset-0 glass-overlay opacity-30 pointer-events-none"></div>
+      </div>
+      
+      <!-- Metadata Card (Responsive flow below the image) -->
+      <div class="w-full bg-surface-container-low/60 backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-white/5 shadow-lg text-center">
+        <div class="flex justify-center gap-2 mb-2 flex-wrap">
+          <span class="bg-primary/20 text-primary px-3 py-0.5 rounded-full text-[10px] font-bold font-label-sm uppercase tracking-widest" id="fullscreen-author-tag">@pepe_luis</span>
+          <span class="bg-white/5 text-on-surface-variant px-3 py-0.5 rounded-full text-[10px] font-label-sm uppercase tracking-widest" id="fullscreen-time-tag">AILIVE-WO4N</span>
+        </div>
+        <h4 class="font-bold text-white text-base sm:text-2xl mb-2 italic leading-snug" id="fullscreen-prompt-text">"Un equipo de preventas bebiendo cerveza..."</h4>
+        <p class="text-[11px] sm:text-xs text-on-surface-variant/80 max-w-2xl mx-auto" id="fullscreen-comment-text">"Comentario de Gemini..."</p>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Warning Modal: Login / Register Prompt (Glassmorphism) -->
+  <div class="fixed inset-0 z-[90] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4" id="login-modal">
+    <div class="bg-surface border border-white/10 p-5 sm:p-8 rounded-2xl max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+      <!-- Glow decoration -->
+      <div class="absolute -top-12 -left-12 w-24 h-24 bg-primary/20 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-12 -right-12 w-24 h-24 bg-tertiary/20 rounded-full blur-3xl"></div>
+      
+      <div class="w-12 h-16 sm:w-16 sm:h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+        <span class="material-symbols-outlined text-primary text-2xl sm:text-3xl animate-bounce">how_to_reg</span>
+      </div>
+      
+      <h4 class="text-xl sm:text-2xl font-bold text-white mb-2">¡Votación Reservada!</h4>
+      <p class="text-xs sm:text-sm text-on-surface-variant mb-4 sm:mb-6 leading-relaxed">Para poder votar y elegir la mejor imagen del evento, necesitas registrarte primero e introducir un apodo en la aplicación del prompter.</p>
+      
+      <div class="bg-surface-container-low p-3 sm:p-4 rounded-xl border border-white/5 flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <!-- Minimal QR placeholder for demo -->
+        <div class="w-16 h-20 sm:w-20 sm:h-24 bg-white/5 rounded border border-white/10 flex flex-col items-center justify-center gap-1 shrink-0">
+          <span class="material-symbols-outlined text-on-surface-variant text-xl sm:text-2xl">qr_code_2</span>
+          <span class="text-[8px] sm:text-[9px] font-label-sm text-on-surface-variant/60">ESCÁNAME</span>
+        </div>
+        <div class="text-left">
+          <p class="text-[10px] sm:text-xs font-bold text-white uppercase tracking-widest font-label-sm">Usa el QR o Enlace</p>
+          <p class="text-[10px] sm:text-[11px] text-on-surface-variant/70 leading-tight">Escanea el código o pulsa el botón inferior para abrir la aplicación de generación de prompts en tu móvil.</p>
+        </div>
+      </div>
+      
+      <div class="flex flex-col gap-2.5 sm:gap-3">
+        <a class="bg-primary text-on-primary font-bold py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs tracking-wider uppercase shadow-[0_4px_20px_rgba(208,188,255,0.25)] hover:brightness-110 active:scale-95 transition-all" href="/prompter/index.html">
+          IR AL PROMPTER
+        </a>
+        <button class="text-on-surface-variant hover:text-white text-xs font-bold py-1.5 transition-colors" id="close-login-modal-btn">
+          CONTINUAR COMO ESPECTADOR
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vite JS Entry Point -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

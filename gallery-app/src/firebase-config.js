@@ -23,7 +23,7 @@ if (
   window.location.hostname === "127.0.0.1" || 
   window.location.hostname.startsWith("192.168.")
 ) {
-  console.log("🔧 Detectado host local. Redireccionando SDK cliente a los Emuladores de Firebase (Puerto 8080/5001)...");
+  console.log("🔧 [Galería] Detectado host local. Redireccionando SDK cliente a los Emuladores de Firebase...");
   connectFirestoreEmulator(db, "localhost", 8080);
   connectFunctionsEmulator(functions, "localhost", 5001);
 }

@@ -9,11 +9,7 @@ import { httpsCallable } from "firebase/functions";
 // ============================================================================
 const BYPASS_PASSCODE_DEMO = false;
 
-// 1. Inicializar el Fondo de Partículas Antigravedad
-document.addEventListener("DOMContentLoaded", () => {
-  initParticles("particles-canvas");
-  checkLocalSession();
-});
+
 
 // 2. Selectores de Elementos de la Interfaz (SPA)
 const mainCard = document.getElementById("main-card");
@@ -385,5 +381,17 @@ btnLogin.addEventListener("click", handleLogin);
 passcodeInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") handleLogin();
 });
+
+// 1. Inicializar el Fondo de Partículas Antigravedad
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+function initApp() {
+  initParticles("particles-canvas");
+  checkLocalSession();
+}
 
 

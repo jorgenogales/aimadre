@@ -1,0 +1,174 @@
+/* design system variables mapped to Stitch specifications */
+:root {
+  --background: #0a0a0b;
+  --surface: #131314;
+  --surface-bright: #3a393a;
+  --surface-dim: #131314;
+  --surface-container-lowest: #0e0e0f;
+  --surface-container-low: #1c1b1c;
+  --surface-container: #201f20;
+  --surface-container-high: #2a2a2b;
+  --surface-container-highest: #353436;
+  
+  --on-surface: #e5e2e3;
+  --on-surface-variant: #cbc3d7;
+  --inverse-surface: #e5e2e3;
+  --inverse-on-surface: #313031;
+  --outline: #958ea0;
+  --outline-variant: #494454;
+  
+  --primary: #8b5cf6; /* Electric Violet */
+  --on-primary: #ffffff;
+  --primary-container: #a078ff;
+  --on-primary-container: #340080;
+  
+  --secondary: #d9ff00; /* Cyber Lime Upvote Button Accent */
+  --on-secondary: #0a0a0b;
+  --secondary-container: #cdf200;
+  --on-secondary-container: #5a6b00;
+  
+  --tertiary: #00f0ff; /* Electric Blue/Cian */
+  --on-tertiary: #00363a;
+  
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  
+  /* Layout Gutter */
+  --gutter: 32px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 16px;
+  }
+}
+
+/* Custom Gutter Utility (Since Tailwind doesn't compile arbitrary custom property variants natively) */
+.px-gutter {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+
+/* Base resets & typography */
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--on-surface);
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.font-label-sm {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.1em;
+}
+
+/* Material Icons configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Glassmorphism gradient */
+.glass-overlay {
+  background: linear-gradient(0deg, rgba(10, 10, 11, 0.95) 0%, rgba(10, 10, 11, 0.4) 40%, rgba(10, 10, 11, 0) 100%);
+}
+
+/* Custom Scrollbar for ultra-clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-lowest);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-container-highest);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Card layout transitions & hover glow */
+.cinematic-card {
+  aspect-ratio: 16 / 9;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  will-change: transform, opacity;
+}
+
+/* Subtle outer holographic purple glow on card hover */
+.cinematic-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.25), 
+              0 0 20px 0 rgba(139, 92, 246, 0.1);
+}
+
+/* Cyber Lime upvote button glow interaction */
+.upvote-btn-glow {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s, box-shadow 0.2s;
+}
+.upvote-btn-glow:hover {
+  box-shadow: 0 0 15px rgba(217, 255, 0, 0.4);
+  transform: scale(1.1);
+}
+.upvote-btn-glow:active {
+  transform: scale(0.9);
+}
+
+/* Voted state styling (active click state) */
+.voted-active {
+  background-color: var(--secondary) !important;
+  color: var(--on-secondary) !important;
+  box-shadow: 0 0 20px rgba(217, 255, 0, 0.6) !important;
+  border-color: var(--secondary) !important;
+}
+
+/* FLIP Layout Transitioning state class */
+.flip-transitioning {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Hero carousel fade animations */
+#hero-bg {
+  transition: background-image 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 6s linear;
+}
+
+/* Retro green terminal blink cursor */
+.cursor-terminal {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: var(--secondary);
+  animation: terminal-blink 0.8s infinite;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+@keyframes terminal-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Floating notice cards or notices */
+.notice-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(0, 240, 255, 0.05) 100%);
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.02);
+}
+
+.notice-card:hover {
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.05), 0 10px 30px -10px rgba(139, 92, 246, 0.15);
+}
+
+/* Micro-interaction: Hover card image zoom */
+.card-img-zoom {
+  transition: transform 6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cinematic-card:hover .card-img-zoom {
+  transform: scale(1.08);
+}
