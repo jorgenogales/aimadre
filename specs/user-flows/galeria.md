@@ -8,11 +8,13 @@
 ## USER FLOWS
 
 ### GALLERY (LANDING PAGE)
+* Puedes encontrar un wireframe del diseño en el proyecto "AI Qué Bonito" de Stitch
 * Será una aplicación llamada "AI Qué Bonito!" que se ejecute en Firebase Hosting
 * Esta aplicación llamará a una cloud function que devuelva todos los contenidos procesados de la colección "prompts" de Firestore y muestre en una página web las imágenes definida en Backend.
 * Para mostrar las imágenes se utilizará la URL pública de los contenidos del bucket
 * La galería debe estar en 16:9 para mostrarse en un monitor gigante
-* Debe mostrar todo el contenido en un carrusel que se va actualizando cada 5 segundos
+* Debe mostrar todo el contenido en una galería que se va actualizando cada 5 segundos
+* La imagen que se resalte como principal en la página será elegida aleatoriamente cada 5 segundos también
 * Cada imagen debe estar sobre una tarjeta con el texto generado, el nombre del autor y el número de votos
 * En la esquina inferior derecha de cada tarjeta habrá un icono de upvote con el número de votos recibidos
 * Las imágenes no deben solaparse entre si
@@ -20,6 +22,7 @@
 * El orden de las imágenes se actualiza en función de los votos recibidos
 * Debe incluir una manera de ir a la app para generar el prompt aimadre.web.app/prompter/index.html
 * A igualdad de votos, se ordenará por la imagen cuyo prompt haya entrado antes, con lo que hay que mostrar esta información en el card
+* 
 * Cuando el usuario se loga en otra aplicación en el mismo dominio deja en el localStorage del navegador un ID. La galería tiene que comprobar que esto existe y si no es así, mostrar una tarjeta en la que se indique que se debe ir a la otra aplicación de generación de prompts para identificarse.
 * IMPORTANTE: Sólo se pueden permitir 3 votos por usuario
 * IMPORTANTE: El usuario puede cambiar su voto pulsando en uno de los votos que haya dado lo cual restará 1 de los votos de la imagen y sumará 1 a los votos restantes

@@ -1,7 +1,19 @@
+#plan b
+/public/pb-app
+/pb-functions
+/public/pb-app/
+/pb-functions/
+/public/pb-app/**
+/pb-functions/**
+
 .DS_Store
+
+#Antigravity
+.antigravitycli
 
 #Firebase
 .firebaserc
+.firebase
 
 # Logs
 logs

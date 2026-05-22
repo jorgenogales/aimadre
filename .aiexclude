@@ -1,2 +1,6 @@
 /public/pb-app
 /pb-functions
+/public/pb-app/
+/pb-functions/
+/public/pb-app/**
+/pb-functions/**

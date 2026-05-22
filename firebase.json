@@ -1,14 +1,6 @@
 {
   "functions": [
     {
-      "source": "pb-functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git"
-      ]
-    },
-    {
       "source": "prompter-functions",
       "codebase": "prompter",
       "ignore": [
@@ -34,10 +26,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/pb-app/**",
-        "destination": "/pb-app/index.html"
-      },
       {
         "source": "/prompter/**",
         "destination": "/prompter/index.html"
