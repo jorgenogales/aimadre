@@ -46,7 +46,7 @@ function getGenAIClient(): GoogleGenAI {
   });
 }
 
-export const submitPrompt = onCall(async (request) => {
+export const PBsubmitPrompt = onCall(async (request) => {
   const { promptText, userId, username, userCode } = request.data || {};
 
   if (!promptText || typeof promptText !== "string" || promptText.trim().length === 0) {
@@ -69,7 +69,7 @@ export const submitPrompt = onCall(async (request) => {
 
     // 2. Invocar la llamada a Gemini 2.5 Flash mediante Vertex AI / Gen AI API
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.5-flash",
       contents: promptText,
       config: {
         systemInstruction: SYSTEM_INSTRUCTIONS,
@@ -172,7 +172,7 @@ export const submitPrompt = onCall(async (request) => {
  * Cloud Function para verificar el código de acceso (Passcode) del evento.
  * Implementa rate-limiting por IP para mitigar ataques de fuerza bruta.
  */
-export const verifyPasscode = onCall(async (request) => {
+export const PBverifyPasscode = onCall(async (request) => {
   const { passcode } = request.data || {};
 
   if (!passcode || typeof passcode !== "string") {

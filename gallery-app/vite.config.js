@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/pb/",
+  base: "/gallery/",
   build: {
-    outDir: "../public/pb",
+    outDir: "../public/gallery",
     emptyOutDir: true
   }
 });

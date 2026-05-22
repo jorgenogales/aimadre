@@ -74,11 +74,11 @@ function initSession() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         currentUserVotes = data.votedPromptIds || [];
-        
+
         // Actualizar el número de votos disponibles en la barra superior
         const votesLeft = Math.max(0, 3 - currentUserVotes.length);
         badgeVotesLeft.textContent = `${votesLeft} VOTOS RESTANTES`;
-        
+
         if (votesLeft === 0) {
           badgeVotesLeft.className = "bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold";
         } else {
@@ -102,7 +102,7 @@ function initSession() {
 // ============================================================================
 function initFirestoreListener() {
   const promptsRef = collection(db, "prompts");
-  
+
   // Escuchamos en tiempo real cualquier cambio en la colección prompts
   onSnapshot(promptsRef, (querySnapshot) => {
     const list = [];
@@ -212,7 +212,7 @@ function animateAndRenderGallery() {
 function renderGalleryGrid() {
   // Guardamos una referencia para saber si inyectar la tarjeta de registro anónimo
   const showRegistrationCard = !userId;
-  
+
   let htmlContent = "";
 
   // 1. Si no hay sesión, inyectamos la tarjeta de bienvenida destacada en la primera posición
@@ -318,22 +318,22 @@ function cycleHeroFeaturedImage(immediate = false) {
 
   const performUpdate = () => {
     currentHeroId = candidate.id;
-    
+
     // Cambiar la imagen con transición de zoom ligera
     heroBg.style.transform = "scale(1.05)";
     heroBg.style.backgroundImage = `url('${candidate.imageUrl}')`;
-    
+
     // Actualizar metadata
     heroTitle.textContent = candidate.promptText;
     heroPrompt.textContent = candidate.comment ? `"${candidate.comment}"` : "Procesado correctamente por Gemini.";
     heroAuthor.textContent = `Autor: @${candidate.username}`;
-    
+
     // Formatear hora de creación
     const dateObj = new Date(candidate.createdAt);
     const formattedTime = `${dateObj.getDate()} de ${dateObj.toLocaleString('es-ES', { month: 'short' })} a las ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
     heroTime.textContent = `${candidate.userCode} • ${formattedTime}`;
     heroVotesCount.textContent = candidate.votes || 0;
-    
+
     updateHeroVoteButtonState();
 
     // Zoom sutil continuo
@@ -389,10 +389,10 @@ function resetHeroPlaceholder() {
 function resetProgressBarAnimation() {
   heroProgress.style.transition = "none";
   heroProgress.style.width = "0%";
-  
+
   // Forzar reflow en el navegador para que detecte el cambio de transición
   void heroProgress.offsetWidth;
-  
+
   // Aplicar ancho final con transición lineal exacta de 5000ms
   heroProgress.style.transition = "width 5000ms linear";
   heroProgress.style.width = "100%";
@@ -401,7 +401,7 @@ function resetProgressBarAnimation() {
 // ============================================================================
 // CONTROLADOR TRANSACCIONAL DE VOTACIÓN (MÉTODO SEGURO)
 // ============================================================================
-window.handleVoteClick = async function(promptId) {
+window.handleVoteClick = async function (promptId) {
   if (isVotingInFlight) return; // Evita el spam de clicks rápidos
 
   // 1. Validar que el usuario esté identificado
@@ -424,7 +424,7 @@ window.handleVoteClick = async function(promptId) {
   document.body.style.cursor = "wait";
 
   try {
-    const votePromptFn = httpsCallable(functions, "votePrompt");
+    const votePromptFn = httpsCallable(functions, "PBvotePrompt");
     const response = await votePromptFn({
       promptId,
       userId,
@@ -478,7 +478,7 @@ function setupEventListeners() {
 // ============================================================================
 // FUNCIONES AUXILIARES DE UI (MODALES)
 // ============================================================================
-window.openFullscreen = function(promptId) {
+window.openFullscreen = function (promptId) {
   const prompt = completedPrompts.find(p => p.id === promptId);
   if (!prompt) return;
 

@@ -1,5 +1,5 @@
 {
-  "name": "prompter-functions",
+  "name": "gallery-functions",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",

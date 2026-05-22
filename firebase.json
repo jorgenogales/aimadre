@@ -14,8 +14,8 @@
       ]
     },
     {
-      "source": "pb-functions",
-      "codebase": "pb",
+      "source": "gallery-functions",
+      "codebase": "gallery",
       "ignore": [
         "node_modules",
         ".git",
@@ -44,8 +44,8 @@
         "destination": "/prompter/index.html"
       },
       {
-        "source": "/pb/**",
-        "destination": "/pb/index.html"
+        "source": "/gallery/**",
+        "destination": "/gallery/index.html"
       }
     ]
   },

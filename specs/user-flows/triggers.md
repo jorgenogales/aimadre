@@ -29,6 +29,6 @@ username: "Pepe Luis"
 (string) 
 votes: 1
 * En cada trigger se hará una transacción (para evitar race conditions) donde se recoja el documento que origina el trigger y todos los documentos que estén por procesar en la colección. En ella se actualizará el campo status a "in-progress" y el campo processedAt con la fecha actual.
-* Para generar la imagen, el modelo al que se llame será "gemini-3.1-flash" (Nanobanana 2) y se deberá llamar con las librerías de Google Gen AI SDK
+* Para generar la imagen, el modelo al que se llame será "gemini-3.1-flash-image-preview" (Nanobanana 2) y se deberá llamar con las librerías de Google Gen AI SDK
 * En la medida de lo posible se deberán paralelizar hasta 5 peticiones (siendo esto configurable)
 * Una vez generada, almacenará la misma en un bucket público llamado "aiquebonito" y se actualizará el documento de Firestore con la ruta

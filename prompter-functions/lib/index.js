@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPasscode = exports.submitPrompt = void 0;
+exports.PBverifyPasscode = exports.PBsubmitPrompt = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const admin = __importStar(require("firebase-admin"));
 const firestore_1 = require("firebase-admin/firestore");
@@ -78,7 +78,7 @@ function getGenAIClient() {
         location: "global"
     });
 }
-exports.submitPrompt = (0, https_1.onCall)(async (request) => {
+exports.PBsubmitPrompt = (0, https_1.onCall)(async (request) => {
     const { promptText, userId, username, userCode } = request.data || {};
     if (!promptText || typeof promptText !== "string" || promptText.trim().length === 0) {
         throw new https_1.HttpsError("invalid-argument", "El promptText es requerido y debe ser una cadena válida.");
@@ -96,7 +96,7 @@ exports.submitPrompt = (0, https_1.onCall)(async (request) => {
         const ai = getGenAIClient();
         // 2. Invocar la llamada a Gemini 2.5 Flash mediante Vertex AI / Gen AI API
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.5-flash",
             contents: promptText,
             config: {
                 systemInstruction: SYSTEM_INSTRUCTIONS,
@@ -189,7 +189,7 @@ exports.submitPrompt = (0, https_1.onCall)(async (request) => {
  * Cloud Function para verificar el código de acceso (Passcode) del evento.
  * Implementa rate-limiting por IP para mitigar ataques de fuerza bruta.
  */
-exports.verifyPasscode = (0, https_1.onCall)(async (request) => {
+exports.PBverifyPasscode = (0, https_1.onCall)(async (request) => {
     const { passcode } = request.data || {};
     if (!passcode || typeof passcode !== "string") {
         throw new https_1.HttpsError("invalid-argument", "El código de acceso es obligatorio.");

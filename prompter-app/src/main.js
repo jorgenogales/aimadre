@@ -256,7 +256,7 @@ async function handleSubmitPrompt() {
 
   try {
     // Instanciar la Cloud Function remota o local segura (submitPrompt)
-    const submitPromptFn = httpsCallable(functions, "submitPrompt");
+    const submitPromptFn = httpsCallable(functions, "PBsubmitPrompt");
 
     const result = await submitPromptFn({
       promptText: text,
@@ -326,7 +326,7 @@ async function handleLogin() {
   btnLogin.disabled = true;
 
   try {
-    const verifyPasscodeFn = httpsCallable(functions, "verifyPasscode");
+    const verifyPasscodeFn = httpsCallable(functions, "PBverifyPasscode");
     const result = await verifyPasscodeFn({ passcode });
 
     if (result.data && result.data.success) {
