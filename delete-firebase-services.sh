@@ -42,11 +42,12 @@ show_help() {
     echo -e "  -f, --force                  Bypass confirmation prompts (useful for automation/CI)"
     echo -e "  -l, --local                  Clean up local build/deploy caches (.firebase/, lib/ folders)"
     echo -e "  -a, --artifacts              Delete the gcf-artifacts repository from Artifact Registry"
+    echo -e "  -s, --firestore              Delete all Firestore collections and documents"
+    echo -e "  -cf, --functions             Delete all deployed Cloud Functions and Cloud Run services"
     echo -e "  -h, --help                   Show this help message and exit"
     echo ""
     echo -e "${BOLD}Description:${NC}"
-    echo "  This script retrieves all currently deployed Firebase Cloud Functions"
-    echo "  for the target project and deletes them in a single batch."
+    echo "  This script cleans up specified Firebase services for the target project."
 }
 
 # Parse command line arguments
@@ -54,6 +55,8 @@ PROJECT_ID="aimadre"
 FORCE=false
 CLEAN_LOCAL=false
 CLEAN_ARTIFACTS=false
+CLEAN_FIRESTORE=false
+CLEAN_FUNCTIONS=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -71,6 +74,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         -a|--artifacts)
             CLEAN_ARTIFACTS=true
+            shift
+            ;;
+        -s|--firestore)
+            CLEAN_FIRESTORE=true
+            shift
+            ;;
+        -cf|--functions)
+            CLEAN_FUNCTIONS=true
             shift
             ;;
         -h|--help)
@@ -153,17 +164,30 @@ if [ -z "$PROJECT_ID" ]; then
     exit 1
 fi
 
+# 2.5. Target Validation
+if [ "$CLEAN_FUNCTIONS" = false ] && [ "$CLEAN_LOCAL" = false ] && [ "$CLEAN_ARTIFACTS" = false ] && [ "$CLEAN_FIRESTORE" = false ]; then
+    log_warning "No cleanup targets specified. Nothing to do."
+    echo -e "Use ${BOLD}-cf${NC} to delete functions, ${BOLD}-s${NC} for firestore, ${BOLD}-l${NC} for local caches, or ${BOLD}-a${NC} for artifacts."
+    echo -e "Run ${BOLD}$0 --help${NC} for all options."
+    exit 0
+fi
+
 # 3. Interactive Confirmation (unless force flag is provided)
 if [ "$FORCE" = false ]; then
     echo ""
     log_warning "CRITICAL TEARDOWN WARNING"
     echo -e "${RED}This script is about to perform the following destructive actions on project:${NC} ${BOLD}$PROJECT_ID${NC}"
-    echo -e "  - Programmatically identify and ${BOLD}DELETE ALL${NC} deployed Cloud Functions."
+    if [ "$CLEAN_FUNCTIONS" = true ]; then
+        echo -e "  - Programmatically identify and ${BOLD}DELETE ALL${NC} deployed Cloud Functions."
+    fi
     if [ "$CLEAN_LOCAL" = true ]; then
         echo -e "  - Delete local build and deploy caches (${BOLD}.firebase/${NC}, ${BOLD}lib/${NC} folders)."
     fi
     if [ "$CLEAN_ARTIFACTS" = true ]; then
         echo -e "  - Delete the ${BOLD}gcf-artifacts${NC} repository from Artifact Registry in region us-central1."
+    fi
+    if [ "$CLEAN_FIRESTORE" = true ]; then
+        echo -e "  - Delete ${BOLD}ALL collections and documents${NC} in the Firestore database."
     fi
     echo ""
     echo -e "These changes are permanent and cannot be undone."
@@ -201,135 +225,149 @@ if [ "$CLEAN_ARTIFACTS" = true ]; then
     fi
 fi
 
-# 4. Deleting Cloud Functions
-echo ""
-echo -e "${BLUE}${BOLD}--- Deleting Deployed Cloud Functions ---${NC}"
-log_info "Fetching deployed functions list from Firebase... (this may take a few seconds)"
-
-# Fetch list of functions in JSON format
-RAW_FUNCTIONS_JSON=$(firebase functions:list --json --project "$PROJECT_ID" 2>/dev/null || echo "[]")
-
-# Parse JSON to extract function names using robust inline Node script
-FUNCTION_IDS=$(echo "$RAW_FUNCTIONS_JSON" | node -e '
-    const fs = require("fs");
-    try {
-        const raw = fs.readFileSync(0, "utf8");
-        const jsonStart = raw.indexOf("[");
-        const jsonStartObj = raw.indexOf("{");
-        let startIndex = -1;
-        if (jsonStart !== -1 && jsonStartObj !== -1) {
-            startIndex = Math.min(jsonStart, jsonStartObj);
-        } else {
-            startIndex = jsonStart !== -1 ? jsonStart : jsonStartObj;
-        }
-        
-        if (startIndex === -1) {
-            console.log("");
-            process.exit(0);
-        }
-        
-        const parsed = JSON.parse(raw.substring(startIndex));
-        let list = [];
-        if (Array.isArray(parsed)) {
-            list = parsed;
-        } else if (parsed && Array.isArray(parsed.result)) {
-            list = parsed.result;
-        } else if (parsed && Array.isArray(parsed.functions)) {
-            list = parsed.functions;
-        } else if (parsed && typeof parsed === "object") {
-            list = [parsed];
-        }
-        
-        const ids = list
-            .map(f => {
-                if (f.id) return f.id;
-                if (f.fullName) {
-                    const parts = f.fullName.split("/");
-                    return parts[parts.length - 1];
-                }
-                if (f.name) {
-                    const parts = f.name.split("/");
-                    return parts[parts.length - 1];
-                }
-                return null;
-            })
-            .filter(Boolean);
-        
-        // Remove duplicates if any
-        const uniqueIds = [...new Set(ids)];
-        console.log(uniqueIds.join(" "));
-    } catch (e) {
-        console.log("");
-    }
-')
-
-if [ -z "$FUNCTION_IDS" ]; then
-    log_success "No deployed Cloud Functions found on project: ${BOLD}$PROJECT_ID${NC}"
-else
-    # Count functions found
-    count=$(echo "$FUNCTION_IDS" | wc -w | tr -d ' ')
-    log_warning "Found $count deployed function(s) scheduled for deletion:"
-    for id in $FUNCTION_IDS; do
-        echo -e "  - ${RED}$id${NC}"
-    done
-    
+# 3.7. Firestore Cleanup
+if [ "$CLEAN_FIRESTORE" = true ]; then
     echo ""
-    log_info "Initiating batch deletion..."
-    # We execute functions:delete with --force since we already did our confirmation step
-    # This deletes the specified functions in all regions
-    if firebase functions:delete $FUNCTION_IDS --project "$PROJECT_ID" --force; then
-        log_success "All functions deleted successfully."
+    echo -e "${BLUE}${BOLD}--- Deleting Firestore Data ---${NC}"
+    log_info "Deleting all collections and documents in Firestore database..."
+    if firebase firestore:delete --all-collections --project "$PROJECT_ID" --force; then
+        log_success "Firestore data deleted successfully."
     else
-        log_error "Failed to delete one or more functions. Please check the error output above."
+        log_error "Failed to delete Firestore data."
     fi
 fi
 
-# 4.5. Robust Direct gcloud Deletion Sweep
-echo ""
-echo -e "${BLUE}${BOLD}--- Performing Direct gcloud Deletion Sweep ---${NC}"
-log_info "Checking for any remaining/dangling functions directly via gcloud..."
-GCLOUD_FUNCTIONS=$(gcloud functions list --project="$PROJECT_ID" --regions=us-central1 --format="value(name)" 2>/dev/null || echo "")
-
-if [ -n "$GCLOUD_FUNCTIONS" ]; then
-    # Count dangling functions
-    dangling_count=$(echo "$GCLOUD_FUNCTIONS" | wc -w | tr -d ' ')
-    log_warning "Found $dangling_count remaining/dangling Cloud Function(s) via gcloud:"
-    for f_name in $GCLOUD_FUNCTIONS; do
-        func_base=$(basename "$f_name")
-        echo -e "  - ${RED}$func_base${NC}"
-    done
-    
+# 4. Deleting Cloud Functions
+if [ "$CLEAN_FUNCTIONS" = true ]; then
     echo ""
-    log_info "Initiating direct gcloud deletions..."
-    for f_name in $GCLOUD_FUNCTIONS; do
-        func_base=$(basename "$f_name")
-        log_info "Deleting function '$func_base' in us-central1..."
-        if gcloud functions delete "$func_base" --region=us-central1 --project="$PROJECT_ID" --quiet; then
-            log_success "Function '$func_base' deleted successfully."
+    echo -e "${BLUE}${BOLD}--- Deleting Deployed Cloud Functions ---${NC}"
+    log_info "Fetching deployed functions list from Firebase... (this may take a few seconds)"
+    
+    # Fetch list of functions in JSON format
+    RAW_FUNCTIONS_JSON=$(firebase functions:list --json --project "$PROJECT_ID" 2>/dev/null || echo "[]")
+    
+    # Parse JSON to extract function names using robust inline Node script
+    FUNCTION_IDS=$(echo "$RAW_FUNCTIONS_JSON" | node -e '
+        const fs = require("fs");
+        try {
+            const raw = fs.readFileSync(0, "utf8");
+            const jsonStart = raw.indexOf("[");
+            const jsonStartObj = raw.indexOf("{");
+            let startIndex = -1;
+            if (jsonStart !== -1 && jsonStartObj !== -1) {
+                startIndex = Math.min(jsonStart, jsonStartObj);
+            } else {
+                startIndex = jsonStart !== -1 ? jsonStart : jsonStartObj;
+            }
+            
+            if (startIndex === -1) {
+                console.log("");
+                process.exit(0);
+            }
+            
+            const parsed = JSON.parse(raw.substring(startIndex));
+            let list = [];
+            if (Array.isArray(parsed)) {
+                list = parsed;
+            } else if (parsed && Array.isArray(parsed.result)) {
+                list = parsed.result;
+            } else if (parsed && Array.isArray(parsed.functions)) {
+                list = parsed.functions;
+            } else if (parsed && typeof parsed === "object") {
+                list = [parsed];
+            }
+            
+            const ids = list
+                .map(f => {
+                    if (f.id) return f.id;
+                    if (f.fullName) {
+                        const parts = f.fullName.split("/");
+                        return parts[parts.length - 1];
+                    }
+                    if (f.name) {
+                        const parts = f.name.split("/");
+                        return parts[parts.length - 1];
+                    }
+                    return null;
+                })
+                .filter(Boolean);
+            
+            // Remove duplicates if any
+            const uniqueIds = [...new Set(ids)];
+            console.log(uniqueIds.join(" "));
+        } catch (e) {
+            console.log("");
+        }
+    ')
+    
+    if [ -z "$FUNCTION_IDS" ]; then
+        log_success "No deployed Cloud Functions found on project: ${BOLD}$PROJECT_ID${NC}"
+    else
+        # Count functions found
+        count=$(echo "$FUNCTION_IDS" | wc -w | tr -d ' ')
+        log_warning "Found $count deployed function(s) scheduled for deletion:"
+        for id in $FUNCTION_IDS; do
+            echo -e "  - ${RED}$id${NC}"
+        done
+        
+        echo ""
+        log_info "Initiating batch deletion..."
+        # We execute functions:delete with --force since we already did our confirmation step
+        # This deletes the specified functions in all regions
+        if firebase functions:delete $FUNCTION_IDS --project "$PROJECT_ID" --force; then
+            log_success "All functions deleted successfully."
         else
-            log_error "Failed to delete function '$func_base'."
+            log_error "Failed to delete one or more functions. Please check the error output above."
         fi
-    done
-else
-    log_success "No remaining dangling functions found via gcloud."
-fi
-
-# 4.6. Cloud Run Service Cleanup Sweep
-echo ""
-log_info "Checking for any remaining Cloud Run services directly..."
-GCLOUD_RUN_SERVICES=$(gcloud run services list --project="$PROJECT_ID" --region=us-central1 --format="value(SERVICE)" 2>/dev/null || echo "")
-
-if [ -n "$GCLOUD_RUN_SERVICES" ]; then
-    for svc in $GCLOUD_RUN_SERVICES; do
-        log_warning "Found leftover Cloud Run service: $svc"
-        log_info "Deleting Cloud Run service '$svc'..."
-        if gcloud run services delete "$svc" --region=us-central1 --project="$PROJECT_ID" --quiet; then
-            log_success "Cloud Run service '$svc' deleted successfully."
-        else
-            log_error "Failed to delete Cloud Run service '$svc'."
-        fi
-    done
-    log_success "Cloud Run service cleanup sweep completed."
+    fi
+    
+    # 4.5. Robust Direct gcloud Deletion Sweep
+    echo ""
+    echo -e "${BLUE}${BOLD}--- Performing Direct gcloud Deletion Sweep ---${NC}"
+    log_info "Checking for any remaining/dangling functions directly via gcloud..."
+    GCLOUD_FUNCTIONS=$(gcloud functions list --project="$PROJECT_ID" --regions=us-central1 --format="value(name)" 2>/dev/null || echo "")
+    
+    if [ -n "$GCLOUD_FUNCTIONS" ]; then
+        # Count dangling functions
+        dangling_count=$(echo "$GCLOUD_FUNCTIONS" | wc -w | tr -d ' ')
+        log_warning "Found $dangling_count remaining/dangling Cloud Function(s) via gcloud:"
+        for f_name in $GCLOUD_FUNCTIONS; do
+            func_base=$(basename "$f_name")
+            echo -e "  - ${RED}$func_base${NC}"
+        done
+        
+        echo ""
+        log_info "Initiating direct gcloud deletions..."
+        for f_name in $GCLOUD_FUNCTIONS; do
+            func_base=$(basename "$f_name")
+            log_info "Deleting function '$func_base' in us-central1..."
+            if gcloud functions delete "$func_base" --region=us-central1 --project="$PROJECT_ID" --quiet; then
+                log_success "Function '$func_base' deleted successfully."
+            else
+                log_error "Failed to delete function '$func_base'."
+            fi
+        done
+    else
+        log_success "No remaining dangling functions found via gcloud."
+    fi
+    
+    # 4.6. Cloud Run Service Cleanup Sweep
+    echo ""
+    log_info "Checking for any remaining Cloud Run services directly..."
+    GCLOUD_RUN_SERVICES=$(gcloud run services list --project="$PROJECT_ID" --region=us-central1 --format="value(SERVICE)" 2>/dev/null || echo "")
+    
+    if [ -n "$GCLOUD_RUN_SERVICES" ]; then
+        for svc in $GCLOUD_RUN_SERVICES; do
+            log_warning "Found leftover Cloud Run service: $svc"
+            log_info "Deleting Cloud Run service '$svc'..."
+            if gcloud run services delete "$svc" --region=us-central1 --project="$PROJECT_ID" --quiet; then
+                log_success "Cloud Run service '$svc' deleted successfully."
+            else
+                log_error "Failed to delete Cloud Run service '$svc'."
+            fi
+        done
+        log_success "Cloud Run service cleanup sweep completed."
+    fi
 fi
 
 
@@ -339,6 +377,17 @@ echo -e "${GREEN}${BOLD}====================================================${NC
 echo -e "${GREEN}${BOLD}             Cleanup Actions Completed              ${NC}"
 echo -e "${GREEN}${BOLD}====================================================${NC}"
 echo -e "Target Project: ${BOLD}$PROJECT_ID${NC}"
-echo -e "  - Cloud Functions: ${GREEN}Removed${NC}"
+if [ "$CLEAN_FUNCTIONS" = true ]; then
+    echo -e "  - Cloud Functions:   ${GREEN}Removed${NC}"
+fi
+if [ "$CLEAN_FIRESTORE" = true ]; then
+    echo -e "  - Firestore Data:    ${GREEN}Deleted${NC}"
+fi
+if [ "$CLEAN_LOCAL" = true ]; then
+    echo -e "  - Local Caches:      ${GREEN}Cleaned${NC}"
+fi
+if [ "$CLEAN_ARTIFACTS" = true ]; then
+    echo -e "  - Artifact Registry: ${GREEN}Purged${NC}"
+fi
 echo -e "${GREEN}${BOLD}====================================================${NC}"
 echo "Cleanup completed successfully!"
