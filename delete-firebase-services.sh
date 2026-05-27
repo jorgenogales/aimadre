@@ -7,6 +7,9 @@
 # Safety first: Exit on unexpected errors, but handle expected steps gracefully
 set -eo pipefail
 
+# Get script directory to resolve paths relatively
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Define beautiful ANSI colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -40,8 +43,9 @@ show_help() {
     echo -e "${BOLD}Options:${NC}"
     echo -e "  -p, --project <project_id>   Specify the target Firebase project ID"
     echo -e "  -f, --force                  Bypass confirmation prompts (useful for automation/CI)"
-    echo -e "  --all                        Select all cleanup targets (local, artifacts, firestore, functions)"
+    echo -e "  --all                        Select all cleanup targets (local, artifacts, firestore, functions, gallery)"
     echo -e "  -l, --local                  Clean up local build/deploy caches (.firebase/, lib/ folders)"
+    echo -e "  -g, --gallery                Delete gallery folders (gallery-functions/, gallery-app/) in aiquebonito"
     echo -e "  -a, --artifacts              Delete the gcf-artifacts repository from Artifact Registry"
     echo -e "  -s, --firestore              Delete all Firestore collections and documents"
     echo -e "  -cf, --functions             Delete all deployed Cloud Functions and Cloud Run services"
@@ -58,6 +62,7 @@ CLEAN_LOCAL=false
 CLEAN_ARTIFACTS=false
 CLEAN_FIRESTORE=false
 CLEAN_FUNCTIONS=false
+CLEAN_GALLERY=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -74,10 +79,15 @@ while [[ $# -gt 0 ]]; do
             CLEAN_ARTIFACTS=true
             CLEAN_FIRESTORE=true
             CLEAN_FUNCTIONS=true
+            CLEAN_GALLERY=true
             shift
             ;;
         -l|--local)
             CLEAN_LOCAL=true
+            shift
+            ;;
+        -g|--gallery)
+            CLEAN_GALLERY=true
             shift
             ;;
         -a|--artifacts)
@@ -173,9 +183,9 @@ if [ -z "$PROJECT_ID" ]; then
 fi
 
 # 2.5. Target Validation
-if [ "$CLEAN_FUNCTIONS" = false ] && [ "$CLEAN_LOCAL" = false ] && [ "$CLEAN_ARTIFACTS" = false ] && [ "$CLEAN_FIRESTORE" = false ]; then
+if [ "$CLEAN_FUNCTIONS" = false ] && [ "$CLEAN_LOCAL" = false ] && [ "$CLEAN_ARTIFACTS" = false ] && [ "$CLEAN_FIRESTORE" = false ] && [ "$CLEAN_GALLERY" = false ]; then
     log_warning "No cleanup targets specified. Nothing to do."
-    echo -e "Use ${BOLD}--all${NC} to select all targets, or individual flags: ${BOLD}-cf${NC}, ${BOLD}-s${NC}, ${BOLD}-l${NC}, or ${BOLD}-a${NC}."
+    echo -e "Use ${BOLD}--all${NC} to select all targets, or individual flags: ${BOLD}-cf${NC}, ${BOLD}-s${NC}, ${BOLD}-l${NC}, ${BOLD}-a${NC}, or ${BOLD}-g${NC}."
     echo -e "Run ${BOLD}$0 --help${NC} for all options."
     exit 0
 fi
@@ -196,6 +206,9 @@ if [ "$FORCE" = false ]; then
     fi
     if [ "$CLEAN_FIRESTORE" = true ]; then
         echo -e "  - Delete ${BOLD}ALL collections and documents${NC} in the Firestore database."
+    fi
+    if [ "$CLEAN_GALLERY" = true ]; then
+        echo -e "  - Delete ${BOLD}gallery-functions/${NC} and ${BOLD}gallery-app/${NC} directories in aiquebonito project."
     fi
     echo ""
     echo -e "These changes are permanent and cannot be undone."
@@ -242,6 +255,30 @@ if [ "$CLEAN_FIRESTORE" = true ]; then
         log_success "Firestore data deleted successfully."
     else
         log_error "Failed to delete Firestore data."
+    fi
+fi
+
+# 3.8. Gallery Cleanup
+if [ "$CLEAN_GALLERY" = true ]; then
+    echo ""
+    echo -e "${BLUE}${BOLD}--- Deleting Gallery Directories in aiquebonito ---${NC}"
+    AIQUEBONITO_DIR="$SCRIPT_DIR/../aiquebonito"
+    if [ -d "$AIQUEBONITO_DIR" ]; then
+        log_info "Deleting gallery folders from $AIQUEBONITO_DIR..."
+        if [ -d "$AIQUEBONITO_DIR/gallery-functions" ] || [ -d "$AIQUEBONITO_DIR/gallery-app" ]; then
+            if [ -d "$AIQUEBONITO_DIR/gallery-functions" ]; then
+                rm -rf "$AIQUEBONITO_DIR/gallery-functions"
+                log_success "Deleted: gallery-functions"
+            fi
+            if [ -d "$AIQUEBONITO_DIR/gallery-app" ]; then
+                rm -rf "$AIQUEBONITO_DIR/gallery-app"
+                log_success "Deleted: gallery-app"
+            fi
+        else
+            log_info "No gallery folders found in $AIQUEBONITO_DIR."
+        fi
+    else
+        log_warning "aiquebonito project directory not found at $AIQUEBONITO_DIR."
     fi
 fi
 
@@ -396,6 +433,9 @@ if [ "$CLEAN_LOCAL" = true ]; then
 fi
 if [ "$CLEAN_ARTIFACTS" = true ]; then
     echo -e "  - Artifact Registry: ${GREEN}Purged${NC}"
+fi
+if [ "$CLEAN_GALLERY" = true ]; then
+    echo -e "  - Gallery Folders:   ${GREEN}Deleted${NC}"
 fi
 echo -e "${GREEN}${BOLD}====================================================${NC}"
 echo "Cleanup completed successfully!"
