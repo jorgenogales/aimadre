@@ -337,8 +337,8 @@ if [ "$CLEAN_FUNCTIONS" = true ]; then
                 })
                 .filter(Boolean);
             
-            // Remove duplicates if any
-            const uniqueIds = [...new Set(ids)];
+            // Remove duplicates and exclude those starting with "pb" or "PB" (case-insensitive)
+            const uniqueIds = [...new Set(ids)].filter(id => !/^pb/i.test(id));
             console.log(uniqueIds.join(" "));
         } catch (e) {
             console.log("");
@@ -369,8 +369,14 @@ if [ "$CLEAN_FUNCTIONS" = true ]; then
     # 4.5. Robust Direct gcloud Deletion Sweep
     echo ""
     echo -e "${BLUE}${BOLD}--- Performing Direct gcloud Deletion Sweep ---${NC}"
-    log_info "Checking for any remaining/dangling functions directly via gcloud..."
-    GCLOUD_FUNCTIONS=$(gcloud functions list --project="$PROJECT_ID" --regions=us-central1 --format="value(name)" 2>/dev/null || echo "")
+    log_info "Checking for any remaining/dangling functions directly via gcloud (excluding those starting with 'pb'/'PB')..."
+    GCLOUD_FUNCTIONS=""
+    for f_name in $(gcloud functions list --project="$PROJECT_ID" --regions=us-central1 --format="value(name)" 2>/dev/null || echo ""); do
+        func_base=$(basename "$f_name")
+        if [[ ! "$func_base" =~ ^[Pp][Bb] ]]; then
+            GCLOUD_FUNCTIONS="${GCLOUD_FUNCTIONS:+$GCLOUD_FUNCTIONS }$f_name"
+        fi
+    done
     
     if [ -n "$GCLOUD_FUNCTIONS" ]; then
         # Count dangling functions
@@ -398,8 +404,13 @@ if [ "$CLEAN_FUNCTIONS" = true ]; then
     
     # 4.6. Cloud Run Service Cleanup Sweep
     echo ""
-    log_info "Checking for any remaining Cloud Run services directly..."
-    GCLOUD_RUN_SERVICES=$(gcloud run services list --project="$PROJECT_ID" --region=us-central1 --format="value(SERVICE)" 2>/dev/null || echo "")
+    log_info "Checking for any remaining Cloud Run services directly (excluding those starting with 'pb'/'PB')..."
+    GCLOUD_RUN_SERVICES=""
+    for svc in $(gcloud run services list --project="$PROJECT_ID" --region=us-central1 --format="value(SERVICE)" 2>/dev/null || echo ""); do
+        if [[ ! "$svc" =~ ^[Pp][Bb] ]]; then
+            GCLOUD_RUN_SERVICES="${GCLOUD_RUN_SERVICES:+$GCLOUD_RUN_SERVICES }$svc"
+        fi
+    done
     
     if [ -n "$GCLOUD_RUN_SERVICES" ]; then
         for svc in $GCLOUD_RUN_SERVICES; do
