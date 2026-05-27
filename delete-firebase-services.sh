@@ -40,6 +40,7 @@ show_help() {
     echo -e "${BOLD}Options:${NC}"
     echo -e "  -p, --project <project_id>   Specify the target Firebase project ID"
     echo -e "  -f, --force                  Bypass confirmation prompts (useful for automation/CI)"
+    echo -e "  --all                        Select all cleanup targets (local, artifacts, firestore, functions)"
     echo -e "  -l, --local                  Clean up local build/deploy caches (.firebase/, lib/ folders)"
     echo -e "  -a, --artifacts              Delete the gcf-artifacts repository from Artifact Registry"
     echo -e "  -s, --firestore              Delete all Firestore collections and documents"
@@ -66,6 +67,13 @@ while [[ $# -gt 0 ]]; do
             ;;
         -f|--force)
             FORCE=true
+            shift
+            ;;
+        --all)
+            CLEAN_LOCAL=true
+            CLEAN_ARTIFACTS=true
+            CLEAN_FIRESTORE=true
+            CLEAN_FUNCTIONS=true
             shift
             ;;
         -l|--local)
@@ -167,7 +175,7 @@ fi
 # 2.5. Target Validation
 if [ "$CLEAN_FUNCTIONS" = false ] && [ "$CLEAN_LOCAL" = false ] && [ "$CLEAN_ARTIFACTS" = false ] && [ "$CLEAN_FIRESTORE" = false ]; then
     log_warning "No cleanup targets specified. Nothing to do."
-    echo -e "Use ${BOLD}-cf${NC} to delete functions, ${BOLD}-s${NC} for firestore, ${BOLD}-l${NC} for local caches, or ${BOLD}-a${NC} for artifacts."
+    echo -e "Use ${BOLD}--all${NC} to select all targets, or individual flags: ${BOLD}-cf${NC}, ${BOLD}-s${NC}, ${BOLD}-l${NC}, or ${BOLD}-a${NC}."
     echo -e "Run ${BOLD}$0 --help${NC} for all options."
     exit 0
 fi
