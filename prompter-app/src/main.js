@@ -7,7 +7,7 @@ import { httpsCallable } from "firebase/functions";
 // CONFIGURACIÓN DE MODO DEMO:
 // Cambia a 'true' para desactivar por completo la pantalla de código de acceso.
 // ============================================================================
-const BYPASS_PASSCODE_DEMO = false;
+const BYPASS_PASSCODE_DEMO = true;
 
 
 
